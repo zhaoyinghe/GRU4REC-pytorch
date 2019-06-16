@@ -14,7 +14,7 @@ class Dataset(object):
         if n_sample > 0:
             self.df = self.df[:n_sample]
 
-        # Add colummn item index to data
+        # Add column item index to data
         self.add_item_indices(itemmap=itemmap)
 
         """
@@ -60,7 +60,7 @@ class Dataset(object):
             item_ids = self.df[self.item_key].unique()  # type is numpy.ndarray
             item2idx = pd.Series(data=np.arange(len(item_ids)),
                                  index=item_ids)
-            # Build itemmap is a DataFrame that have 2 columns (self.item_key, 'item_idx)
+            # Build itemmap is a DataFrame that have 2 columns (self.item_key, item_idx)
             itemmap = pd.DataFrame({self.item_key: item_ids,
                                    'item_idx': item2idx[item_ids].values})
         self.itemmap = itemmap
@@ -73,7 +73,7 @@ class Dataset(object):
         self.df[self.session_key] return a set of session_key
         self.df[self.session_key].nunique() return the size of session_key set (int)
         self.df.groupby(self.session_key).size() return the size of each session_id
-        self.df.groupby(self.session_key).size().cumsum() retunn cumulative sum
+        self.df.groupby(self.session_key).size().cumsum() return cumulative sum
         """
         offsets = np.zeros(self.df[self.session_key].nunique() + 1, dtype=np.int32)
         offsets[1:] = self.df.groupby(self.session_key).size().cumsum()

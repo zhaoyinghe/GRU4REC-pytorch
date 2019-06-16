@@ -1,6 +1,7 @@
 from torch import nn
 import torch
 
+
 class GRU4REC(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, num_layers=1, final_act='tanh',
                  dropout_hidden=.5, dropout_input=0, batch_size=50, embedding_dim=-1, use_cuda=False):
@@ -41,8 +42,6 @@ class GRU4REC(nn.Module):
         elif final_act.startswith('leaky-'):
             self.final_activation = nn.LeakyReLU(negative_slope=float(final_act.split('-')[1]))
 
-
-
     def forward(self, input, hidden):
         '''
         Args:
@@ -56,14 +55,15 @@ class GRU4REC(nn.Module):
 
         if self.embedding_dim == -1:
             embedded = self.onehot_encode(input)
-            if self.training and self.dropout_input > 0: embedded = self.embedding_dropout(embedded)
+            if self.training and self.dropout_input > 0:
+                embedded = self.embedding_dropout(embedded)
             embedded = embedded.unsqueeze(0)
         else:
             embedded = input.unsqueeze(0)
             embedded = self.look_up(embedded)
 
-        output, hidden = self.gru(embedded, hidden) # (num_layer, B, H)
-        output = output.view(-1, output.size(-1))  # (B,H)
+        output, hidden = self.gru(embedded, hidden)  # (num_layer, B, H)
+        output = output.view(-1, output.size(-1))    # (B,H)
         logit = self.final_activation(self.h2o(output))
 
         return logit, hidden
