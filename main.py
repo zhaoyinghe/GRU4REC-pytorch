@@ -4,6 +4,7 @@ import lib
 import numpy as np
 import os
 import datetime
+from lib.util import create_logger
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--hidden_size', default=100, type=int)
@@ -119,6 +120,7 @@ def main():
 
     n_epochs = args.n_epochs
     time_sort = args.time_sort
+    logger = create_logger(args.checkpoint_dir)
 
     if not args.is_eval:
         model = lib.GRU4REC(input_size, hidden_size, output_size,
@@ -153,10 +155,10 @@ def main():
                               loss_func=loss_function,
                               args=args)
 
-        trainer.train(0, n_epochs - 1)
+        trainer.train(0, n_epochs - 1, logger)
     else:
         if args.load_model is not None:
-            print("Loading pre trained model from {}".format(args.load_model))
+            logger("Loading pre trained model from {}".format(args.load_model))
             checkpoint = torch.load(args.load_model)
             model = checkpoint["model"]
             model.gru.flatten_parameters()
@@ -164,9 +166,9 @@ def main():
             loss_function = lib.LossFunction(loss_type=loss_type, use_cuda=args.cuda)
             evaluation = lib.Evaluation(model, loss_function, use_cuda=args.cuda)
             loss, recall, mrr = evaluation.eval(valid_data)
-            print("Final result: recall = {:.2f}, mrr = {:.2f}".format(recall, mrr))
+            logger.info("Final result: recall = {:.2f}, mrr = {:.2f}".format(recall, mrr))
         else:
-            print("Pre trained model is None!")
+            logger.info("Pre trained model is None!")
 
 
 if __name__ == '__main__':

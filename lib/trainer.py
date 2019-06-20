@@ -16,7 +16,7 @@ class Trainer(object):
         self.device = torch.device('cuda' if use_cuda else 'cpu')
         self.args = args
 
-    def train(self, start_epoch, end_epoch, start_time=None):
+    def train(self, start_epoch, end_epoch, logger, start_time=None):
         if start_time is None:
             self.start_time = time.time()
         else:
@@ -28,7 +28,7 @@ class Trainer(object):
             loss, recall, mrr = self.evaluation.eval(self.eval_data)
 
 
-            print("Epoch: {}, loss: {:.2f}, recall: {:.2f}, mrr: {:.2f}, time: {}".format(epoch, loss, recall, mrr, time.time() - st))
+            logger.info("Epoch: {}, loss: {:.2f}, recall: {:.2f}, mrr: {:.2f}, time: {}".format(epoch, loss, recall, mrr, time.time() - st))
             checkpoint = {
                 'model': self.model,
                 'args': self.args,
@@ -40,7 +40,7 @@ class Trainer(object):
             }
             model_name = os.path.join(self.args.checkpoint_dir, "model_{0:05d}.pt".format(epoch))
             torch.save(checkpoint, model_name)
-            print("Save model as %s" % model_name)
+            logger.info("Save model as %s" % model_name)
 
 
     def train_epoch(self, epoch):
