@@ -153,10 +153,9 @@ class DataLoader():
                 end[idx] = click_offsets[session_idx_arr[maxiter] + 1]
 
 
-import os
-import time
-                
 if __name__ == '__main__':
+    import os
+    import time
     map_path = "../data/preprocessed_data/itemmap.txt"
     path = '../data/rsc15_train_full.txt'
     itemmap = pd.read_csv(map_path, sep=' ', names=['ItemId', 'item_idx'])
@@ -165,11 +164,9 @@ if __name__ == '__main__':
     start_time = time.time()
     short_name, extension = os.path.splitext(path)
     with open(os.path.join(os.path.dirname(short_name), os.path.basename(short_name)+'_triplet'+extension), 'w') as f:
-        lines = []
         for name, group in S.df.groupby('SessionId'):
             line = ' '.join(map(str, list(group.item_idx)))
-            lines.append(line)
-        f.writelines(lines)
+            f.write(line + '\n')
     end_time = time.time()
     print(end_time-start_time)
 

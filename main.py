@@ -1,5 +1,6 @@
 import argparse
 import torch
+import pandas as pd
 import lib
 import numpy as np
 import os
@@ -39,6 +40,7 @@ parser.add_argument('--data_folder', default='data/preprocessed_data', type=str)
 parser.add_argument('--train_data', default='rsc15_train_full.txt', type=str)
 parser.add_argument('--valid_data', default='rsc15_test.txt', type=str)
 parser.add_argument('--test_data', default='rsc15_test.txt', type=str)
+parser.add_argument('--itemmap_data', default='itemmap.txt', type=str)
 parser.add_argument("--is_eval", action='store_true')
 parser.add_argument('--load_model', default=None,  type=str)
 parser.add_argument('--checkpoint_dir', type=str, default='checkpoint')
@@ -90,13 +92,15 @@ def init_model(model):
 
 
 def main():
+    print("Loading itemmap data from {}".format(os.path.join(args.data_folder, args.itemmap_data)))
     print("Loading train data from {}".format(os.path.join(args.data_folder, args.train_data)))
     print("Loading valid data from {}".format(os.path.join(args.data_folder, args.valid_data)))
     print("Loading test data from {}\n".format(os.path.join(args.data_folder, args.test_data)))
 
-    train_data = lib.Dataset(os.path.join(args.data_folder, args.train_data))
-    valid_data = lib.Dataset(os.path.join(args.data_folder, args.valid_data), itemmap=train_data.itemmap)
-    test_data = lib.Dataset(os.path.join(args.data_folder, args.test_data))
+    itemmap = pd.read_csv(os.path.join(args.data_folder, args.itemmap_data), sep=' ', names=['ItemId', 'item_idx'])
+    train_data = lib.Dataset(os.path.join(args.data_folder, args.train_data), itemmap=itemmap)
+    valid_data = lib.Dataset(os.path.join(args.data_folder, args.valid_data), itemmap=itemmap)
+    test_data = lib.Dataset(os.path.join(args.data_folder, args.test_data), itemmap=itemmap)
 
     if not args.is_eval:
         make_checkpoint_dir()
