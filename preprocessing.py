@@ -14,9 +14,11 @@ ADD_TEN_PERCENT = False
 PATH_TO_ORIGINAL_DATA = 'data/raw_data/'
 PATH_TO_PROCESSED_DATA = 'data/preprocessed_data/'
 
-data = pd.read_csv(PATH_TO_ORIGINAL_DATA + 'yoochoose-clicks-small.dat', sep=',', header=None, usecols=[0, 1, 2], dtype={0:np.int32, 1:str, 2:np.int64})
+data = pd.read_csv(PATH_TO_ORIGINAL_DATA + 'yoochoose-clicks.dat', sep=',', header=None, usecols=[0, 1, 2], dtype={0:np.int32, 1:str, 2:np.int64})
 data.columns = ['SessionId', 'TimeStr', 'ItemId']
-data['Time'] = data.TimeStr.apply(lambda x: dt.datetime.strptime(x, '%Y-%m-%dT%H:%M:%S.%fZ').timestamp()) #This is not UTC. It does not really matter.
+# 这不是UTC,这真的无所谓
+data['Time'] = data.TimeStr.apply(lambda x: dt.datetime.strptime(x, '%Y-%m-%dT%H:%M:%S.%fZ').timestamp())
+
 del(data['TimeStr'])
 
 session_lengths = data.groupby('SessionId').size()
@@ -26,6 +28,11 @@ data = data[np.in1d(data.ItemId, item_supports[item_supports>=5].index)]
 session_lengths = data.groupby('SessionId').size()
 data = data[np.in1d(data.SessionId, session_lengths[session_lengths>=2].index)]
 
+item_ids = data['ItemId'].unique()  # type is numpy.ndarray
+item2idx = pd.Series(data=np.arange(len(item_ids)), index=item_ids)
+# Build itemmap is a DataFrame that have 2 columns (self.item_key, item_idx)
+itemmap = pd.DataFrame({'ItemId': item_ids, 'item_idx': item2idx[item_ids].values})
+itemmap.to_csv(PATH_TO_PROCESSED_DATA + 'itemmap.txt', sep=' ', header=False, index=False)
 
 tmax = data.Time.max()
 tmin = data.Time.min()

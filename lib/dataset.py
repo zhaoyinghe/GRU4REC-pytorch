@@ -4,9 +4,9 @@ import torch
 
 
 class Dataset(object):
-    def __init__(self, path, sep='\t', session_key='SessionID', item_key='ItemId', time_key='timestamp', n_sample=-1, itemmap=None, itemstamp=None, time_sort=False):
+    def __init__(self, path, sep='\t', session_key='SessionId', item_key='ItemId', time_key='Time', n_sample=-1, itemmap=None, itemstamp=None, time_sort=False):
         # Read csv
-        self.df = pd.read_csv(path, sep=sep, names=[session_key, item_key, time_key])
+        self.df = pd.read_csv(path, sep=sep)
         self.session_key = session_key
         self.item_key = item_key
         self.time_key = time_key
@@ -152,7 +152,26 @@ class DataLoader():
                 start[idx] = click_offsets[session_idx_arr[maxiter]]
                 end[idx] = click_offsets[session_idx_arr[maxiter] + 1]
 
+
+import os
+import time
                 
 if __name__ == '__main__':
-    path = '/home/hungthanhpham94/dev/NLP/GRU4REC-pytorch/data/preprocessed_data/rsc15_train_valid.txt'
-    S = Dataset(path)
+    map_path = "../data/preprocessed_data/itemmap.txt"
+    path = '../data/rsc15_train_full.txt'
+    itemmap = pd.read_csv(map_path, sep=' ', names=['ItemId', 'item_idx'])
+    print(len(itemmap))
+    S = Dataset(path, itemmap=itemmap)
+    start_time = time.time()
+    short_name, extension = os.path.splitext(path)
+    with open(os.path.join(os.path.dirname(short_name), os.path.basename(short_name)+'_triplet'+extension), 'w') as f:
+        lines = []
+        for name, group in S.df.groupby('SessionId'):
+            line = ' '.join(map(str, list(group.item_idx)))
+            lines.append(line)
+        f.writelines(lines)
+    end_time = time.time()
+    print(end_time-start_time)
+
+
+
